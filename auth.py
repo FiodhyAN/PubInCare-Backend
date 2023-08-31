@@ -24,8 +24,8 @@ def register():
             return jsonify({"message": "Email already exists"}), 400
         elif not re.match(r'[^@]+@[^@]+\.[^@]+', email):
             return jsonify({"message": "Invalid email Address"}), 400
-        elif len(password) < 6 or re.search('[0-9]', password) is None:
-            return jsonify({"message": "Password must be at least 6 characters long and contain a number"}), 400
+        elif len(password) < 6 or (re.search(r'[a-zA-Z]', password) is None) or re.search(r'[0-9]', password) is None:
+            return jsonify({"message": "Password must be at least 6 characters long and contain a number and letter"}), 400
         else:
             password = bcrypt.generate_password_hash(password).decode('utf-8')
             cur.execute(''' INSERT INTO users (name, email, password, role, created_at, updated_at) VALUES (%s, %s, %s, %s, NOW(), NOW())''', (name, email, password, role))
@@ -76,8 +76,8 @@ def changePW():
         
         if user:
             if password == confirmPassword:
-                if len(confirmPassword) < 6 or re.search('[0-9]', confirmPassword) is None:
-                    return jsonify({"message": "Password must be at least 6 characters long and contain a number"}), 400
+                if len(password) < 6 or (re.search(r'[a-zA-Z]', password) is None) or re.search(r'[0-9]', password) is None:
+                    return jsonify({"message": "Password must be at least 6 characters long and contain a number and letter"}), 400
                 else:
                     password = bcrypt.generate_password_hash(confirmPassword).decode('utf-8')
                     cur.execute(''' UPDATE users SET password = %s WHERE email = %s ''', (password, email))
