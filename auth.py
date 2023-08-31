@@ -35,3 +35,29 @@ def register():
             return jsonify({"message": "Success"}), 200
     else:
         return jsonify({"message": "Registration failed wrong method"}), 400
+    
+def login():
+    email = request.form["email"]
+    password = request.form["password"]
+    if request.method == "POST" and email and password:
+        conn = db_conn()
+        cur = conn.cursor()
+        
+        cur.execute(''' SELECT * FROM users WHERE email = %s ''', (email,))
+        user = cur.fetchone()
+        
+        if user:
+            if bcrypt.check_password_hash(user[3], password):
+                return jsonify({"message": "Success",
+                                "user": {
+                                    "id": user[0],
+                                    "name": user[1],
+                                    "email": user[2],
+                                    "role": user[4]
+                                }}), 200
+            else:
+                return jsonify({"message": "Invalid email or password"}), 400
+        else:
+            return jsonify({"message": "Invalid email or password"}), 400
+    else:
+        return jsonify({"message": "Login failed wrong method"}), 400
