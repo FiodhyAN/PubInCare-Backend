@@ -7,8 +7,11 @@ cur = conn.cursor()
 # cur.execute(''' CREATE TABLE IF NOT EXISTS users (id serial PRIMARY KEY, name varchar(255), email varchar(255), password varchar(255), role varchar(255), created_at timestamp, updated_at timestamp)''')
 
 # refresh the database
-cur.execute(''' DROP TABLE IF EXISTS users ''')
-cur.execute(''' CREATE TABLE IF NOT EXISTS users (id serial PRIMARY KEY, name varchar(255), email varchar(255), password varchar(255), role varchar(255), created_at timestamp, updated_at timestamp)''')
+# cur.execute(''' DROP TABLE IF EXISTS users ''')
+# cur.execute(''' CREATE TABLE IF NOT EXISTS users (id serial PRIMARY KEY, name varchar(255), email varchar(255), password varchar(255), role varchar(255), created_at timestamp, updated_at timestamp)''')
+
+cur.execute(''' DROP TABLE IF EXISTS reports ''')
+cur.execute(''' CREATE TABLE IF NOT EXISTS reports (id serial PRIMARY KEY, user_id integer, nama_pengadu varchar(255), jenis_pengaduan varchar(255), lokasi varchar(255), keluhan varchar(255), image_url varchar(255), status boolean, created_at timestamp, updated_at timestamp)''')
 
 conn.commit()
 cur.close()
