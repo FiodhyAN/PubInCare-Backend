@@ -6,6 +6,7 @@ from flask_cors import CORS
 from auth import register, login, changePW
 from reports import create_report, get_reports
 
+
 app = Flask(__name__)
 CORS(app)
 
