@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from auth import register, login, changePW
-from reports import create_report, get_reports
+from reports import create_report, get_reports, get_report
 
 
 app = Flask(__name__)
@@ -43,6 +43,10 @@ def get_image(filename):
         mimetype = 'application/octet-stream'  # Default to binary if mimetype cannot be determined
 
     return send_file(file_path, mimetype=mimetype)
+
+@app.route("/reports/<id>", methods=["GET"])
+def get_report_route(id):
+    return get_report(id)
 
 
 if __name__ == "__main__":

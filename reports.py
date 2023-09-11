@@ -124,3 +124,26 @@ def get_reports():
         return jsonify(reports), 200
     else:
         return jsonify({"message": "Report not found"}), 404
+    
+def get_report(id):
+    conn = db_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM reports WHERE id = %s", (id,))
+    row = cur.fetchone()
+    if row:
+        report = {
+            "id": row[0],
+            "no_laporan": row[1],
+            "user_id": row[2],
+            "nama_pengadu": row[3],
+            "jenis_pengaduan": row[4],
+            "lokasi": row[5],
+            "keluhan": row[6],
+            "image_url": row[7],
+            "status": row[8],
+            "created_at": row[9],
+            "updated_at": row[10]
+        }
+        return jsonify(report), 200
+    else:
+        return jsonify({"message": "Report not found"}), 404
