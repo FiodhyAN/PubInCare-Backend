@@ -48,13 +48,20 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def create_report():
+    jenis_pengaduan = request.form["jenis_pengaduan"]
+
     file = request.files["image_url"]
     filetype = file.filename.rsplit(".", 1)[1].lower()
     filename = f"Report_{int(datetime.now().timestamp())}.{filetype}"
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     file.save(os.path.join(UPLOAD_FOLDER, filename))
-    sistem_status = model_predict(filepath, model)
-    jenis_pengaduan = request.form["jenis_pengaduan"]
+
+    if jenis_pengaduan == "Perbaikan":
+        sistem_status = model_predict(filepath, model)
+        if sistem_status[0] == "normal":
+            status = False
+        else:
+            status = True
     timestamp = int(datetime.now().timestamp())
     random_number = random.randint(100, 999)
     if jenis_pengaduan == "Perbaikan":
@@ -62,18 +69,10 @@ def create_report():
     else:
         no_laporan = f"PNG_{timestamp}_{random_number}"
     user_id = request.form["user_id"]
-    file = request.files["image_url"]
     nama_pengadu = request.form["nama_pengadu"]
     lokasi = request.form["lokasi"]
     keluhan = request.form["keluhan"]
-    if sistem_status[0] == "normal":
-        status = False
-    else:
-        status = True
     if file and allowed_file(file.filename) and nama_pengadu and jenis_pengaduan and lokasi and keluhan:
-        filetype = file.filename.rsplit(".", 1)[1].lower()
-        filename = f"Report_{int(datetime.now().timestamp())}.{filetype}"
-        file.save(os.path.join(UPLOAD_FOLDER, filename))
         image_url = filename
         conn = db_conn()
         cur = conn.cursor()
@@ -88,7 +87,10 @@ def create_report():
                     no_laporan = f"PRB_{timestamp}_{random_number}"
                 else:
                     no_laporan = f"PNG_{timestamp}_{random_number}"
-        cur.execute("INSERT INTO reports (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status, datetime.now(), datetime.now()))
+        if jenis_pengaduan == "Perbaikan":
+            cur.execute("INSERT INTO reports (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status, datetime.now(), datetime.now()))
+        else:
+            cur.execute("INSERT INTO reports (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, datetime.now(), datetime.now()))
         conn.commit()
         cur.close()
         conn.close()
