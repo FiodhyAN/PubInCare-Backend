@@ -162,4 +162,4 @@ cython_debug/
 #.idea/
 
 PubInCare.h5
-.PubInCare.h5
+images/*
