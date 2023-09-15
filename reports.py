@@ -37,7 +37,7 @@ def model_predict(img_path, model):
     pred = np.argmax(result, axis=1)
     return PREDICTION_CLASSES[pred[0]]
 
-UPLOAD_FOLDER = "./images"
+UPLOAD_FOLDER = "./images/report"
 ALLOWED_EXTENSIONS = set(["png", "jpg", "jpeg"])
 
 def db_conn():

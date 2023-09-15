@@ -3,7 +3,7 @@ import mimetypes
 from flask import Flask, request, jsonify, send_file
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-from auth import register, login, changePW
+from auth import register, login, changePW, store_profile_image
 from reports import create_report, get_reports, get_report
 
 
@@ -36,7 +36,7 @@ def get_reports_route():
 
 @app.route("/images/<filename>")
 def get_image(filename):
-    file_path = f"./images/{filename}"
+    file_path = f"./images/report/{filename}"
     mimetype, _ = mimetypes.guess_type(file_path)
     
     if mimetype is None:
@@ -47,6 +47,20 @@ def get_image(filename):
 @app.route("/reports/<id>", methods=["GET"])
 def get_report_route(id):
     return get_report(id)
+
+@app.route("/profile_image/store", methods=["POST"])
+def store_profile_image_route():
+    return store_profile_image()
+
+@app.route("/profile_image/<filename>")
+def get_profile_image(filename):
+    file_path = f"./images/profile/{filename}"
+    mimetype, _ = mimetypes.guess_type(file_path)
+    
+    if mimetype is None:
+        mimetype = 'application/octet-stream'
+    
+    return send_file(file_path, mimetype=mimetype)
 
 
 if __name__ == "__main__":
