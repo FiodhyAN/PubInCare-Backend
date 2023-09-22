@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, send_file
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from auth import register, login, changePW, store_profile_image
-from reports import create_report, get_reports, get_report
+from reports import create_report, get_reports, get_report, get_report_status
 
 
 app = Flask(__name__)
@@ -61,6 +61,10 @@ def get_profile_image(filename):
         mimetype = 'application/octet-stream'
     
     return send_file(file_path, mimetype=mimetype)
+
+@app.route("/reports/<id>/status")
+def get_report_status_route(id):
+    return get_report_status(id)
 
 
 if __name__ == "__main__":

@@ -88,9 +88,16 @@ def create_report():
                 else:
                     no_laporan = f"PNG_{timestamp}_{random_number}"
         if jenis_pengaduan == "Perbaikan":
-            cur.execute("INSERT INTO reports (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status, datetime.now(), datetime.now()))
+            cur.execute("INSERT INTO reports (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status_sistem, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id", (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, status, datetime.now(), datetime.now()))
+            last_id = cur.fetchone()[0]
+            if(status):
+                cur.execute("INSERT INTO report_status (report_id, status, created_at, updated_at) VALUES (%s, %s, %s, %s)", (last_id, "Diterima Sistem", datetime.now(), datetime.now()))
+            else:
+                cur.execute("INSERT INTO report_status (report_id, status, created_at, updated_at) VALUES (%s, %s, %s, %s)", (last_id, "Ditolak Sistem", datetime.now(), datetime.now()))
         else:
-            cur.execute("INSERT INTO reports (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)", (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, datetime.now(), datetime.now()))
+            cur.execute("INSERT INTO reports (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, created_at, updated_at) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id", (user_id, no_laporan, nama_pengadu, jenis_pengaduan, lokasi, keluhan, image_url, datetime.now(), datetime.now()))
+            last_id = cur.fetchone()[0]
+            cur.execute("INSERT INTO report_status (report_id, status, created_at, updated_at) VALUES (%s, %s, %s, %s)", (last_id, "Menunggu Admin", datetime.now(), datetime.now()))
         conn.commit()
         cur.close()
         conn.close()
@@ -105,9 +112,9 @@ def get_reports():
     cur = conn.cursor()
     if user:
         if search:
-            cur.execute("SELECT id, no_laporan, status, lokasi, image_url FROM reports WHERE user_id = %s AND (no_laporan ILIKE %s OR lokasi ILIKE %s)", (user, "%" + search + "%", "%" + search + "%"))
+            cur.execute("SELECT id, no_laporan, status_sistem, lokasi, image_url FROM reports WHERE user_id = %s AND (no_laporan ILIKE %s OR lokasi ILIKE %s)", (user, "%" + search + "%", "%" + search + "%"))
         else:
-            cur.execute("SELECT id, no_laporan, status, lokasi, image_url FROM reports WHERE user_id = %s", (user,))
+            cur.execute("SELECT id, no_laporan, status_sistem, lokasi, image_url FROM reports WHERE user_id = %s", (user,))
     else:
         return jsonify({"message": "User not found"}), 404
     rows = cur.fetchall()
@@ -141,9 +148,25 @@ def get_report(id):
             "keluhan": row[6],
             "image_url": row[7],
             "status": row[8],
-            "created_at": row[9],
-            "updated_at": row[10]
+            "pesan": row[9],
+            "created_at": row[10],
+            "updated_at": row[11]
         }
         return jsonify(report), 200
+    else:
+        return jsonify({"message": "Report not found"}), 404
+    
+def get_report_status(id):
+    conn = db_conn()
+    cur = conn.cursor()
+    cur.execute("SELECT reports.id, reports.jenis_pengaduan, report_status.status FROM reports LEFT JOIN report_status ON reports.id = report_status.report_id WHERE reports.id = %s", (id,))
+    row = cur.fetchone()
+    if row:
+        report_status = {
+            "id": row[0],
+            "jenis_pengaduan": row[1],
+            "status": row[2]
+        }
+        return jsonify(report_status), 200
     else:
         return jsonify({"message": "Report not found"}), 404
