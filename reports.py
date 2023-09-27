@@ -159,13 +159,14 @@ def get_report(id):
 def get_report_status(id):
     conn = db_conn()
     cur = conn.cursor()
-    cur.execute("SELECT reports.id, reports.jenis_pengaduan, report_status.status FROM reports LEFT JOIN report_status ON reports.id = report_status.report_id WHERE reports.id = %s", (id,))
+    cur.execute("SELECT reports.id, reports.no_laporan, reports.jenis_pengaduan, report_status.status FROM reports LEFT JOIN report_status ON reports.id = report_status.report_id WHERE reports.id = %s", (id,))
     row = cur.fetchone()
     if row:
         report_status = {
             "id": row[0],
-            "jenis_pengaduan": row[1],
-            "status": row[2]
+            "no_laporan": row[1],
+            "jenis_pengaduan": row[2],
+            "status": row[3]
         }
         return jsonify(report_status), 200
     else:
